@@ -1,0 +1,83 @@
+-- 1) WRITE A QUERY TO PRINT TOP 5 CITIES WITH HIGHEST SPENDS AND THEIR PERCENTAGE CONTRIBUTION OF TOTAL CREDIT CARD SPENDS 
+
+with cte as (
+	select city, sum(amount) as total_spend
+	from credit_tran
+	group by city
+	order by sum(amount) desc
+	limit 5
+),
+total_spent as (
+	select sum(cast(amount as signed)) as total_amount
+	from credit_tran
+)
+select *, total_spend / total_amount * 100 as percentage_contribution
+from cte, total_spent
+order by total_spend desc;
+
+
+-- 2) WRITE A QUERY TO PRINT HIGHEST SPEND MONTH AND AMOUNT SPENT IN THAT MONTH FOR EACH CARD TYPE
+
+with cte as (
+	select card_type, year(date) as year, month(date) as month, sum(amount) as total_spend
+	from credit_tran
+	group by card_type, year(date), month(date)
+)
+select *
+from (
+	select *, rank() over (partition by card_type order by total_spend desc) as rn
+	from cte
+) as ranked
+where rn = 1
+order by card_type;
+
+
+-- 3) WRITE A QUERY TO PRINT THE TRANSACTION DETAILS (ALL COLUMNS FROM THE TABLE) FOR EACH CARD TYPE WHEN 
+-- IT REACHES A CUMULATIVE OF 1000000 TOTAL SPENDS (WE SHOULD HAVE 4 ROWS IN THE OUTPUT, ONE FOR EACH CARD TYPE)
+
+with cte as (
+	select *, sum(amount) over (partition by card_type order by date, id) as cumulative_spend
+	from credit_tran
+)
+select *
+from cte
+where cumulative_spend >= 1000000
+	and not exists (
+		select 1
+		from cte c2
+		where c2.card_type = cte.card_type
+			and c2.cumulative_spend >= 1000000
+			and c2.cumulative_spend < cte.cumulative_spend
+	);
+
+
+-- 4) WRITE A QUERY TO FIND CITY WHICH HAD LOWEST PERCENTAGE SPEND FOR GOLD CARD TYPE
+
+with cte as (
+	select city, card_type, sum(amount) as amount,
+		   sum(case when card_type = 'gold' then amount end) as gold_amount
+	from credit_tran
+	group by city, card_type
+)
+select city, sum(gold_amount) / sum(amount) * 100 as gold_ratio
+from cte
+group by city
+having sum(gold_amount) is not null
+order by gold_ratio
+limit 1;
+
+
+-- 5) DETECT UNUSUALLY HIGH SPEND TRANSACTIONS USING STANDARD DEVIATION
+
+with stats as (
+	select avg(amount) as avg_sum, stddev(amount) as std_amount
+	from credit_tran
+)
+select *
+from credit_tran, stats
+where amount > avg_sum + 2 * std_amount
+order by amount desc;
+
+
+-- 6) CITY CONTRIBUTION VS OVERALL 
+-- OPTIMIZED USING OVER(

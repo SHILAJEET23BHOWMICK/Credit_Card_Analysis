@@ -80,4 +80,49 @@ order by amount desc;
 
 
 -- 6) CITY CONTRIBUTION VS OVERALL 
--- OPTIMIZED USING OVER(
+-- OPTIMIZED USING OVER() TO REDUCE QUERY TIME INSTEAD OF MULTIPLE SCANS
+
+select city, sum(amount) as city_spend,
+	   round(sum(amount) * 100.0 / sum(sum(amount)) over (), 2) as pr_contri
+from credit_tran
+group by city
+order by pr_contri desc;
+
+
+-- 7) SHOW TOTAL SALES AMOUNT BROKEN DOWN BY CITY, 
+-- WITH PROGRESSIVE SUBTOTALS BY YEAR AND MONTH USING ROLLUP
+
+select city, year(date), month(date), sum(amount) as total_amount
+from credit_tran
+group by city, year(date), month(date)
+with rollup;
+
+
+-- 8) FIND THE MEDIAN AMOUNT FOR EACH CITY
+
+select city, avg(amount) as median
+from (
+	select city, amount,
+		   row_number() over (partition by city order by amount) as row_num,
+		   count(*) over (partition by city) as total_row
+	from credit_tran
+) as ranked
+where row_num in (floor((total_row + 1) / 2), ceil((total_row + 1) / 2))
+group by city;
+
+
+-- 9) FIND THE PERCENTAGE CONTRIBUTION OF FEMALES FOR EACH EXPENSE TYPE
+
+select exp_type,
+	   sum(case when gender = 'f' then amount else 0 end) / sum(amount) as percentage_contri
+from credit_tran
+group by exp_type
+order by percentage_contri desc;
+
+
+-- 10) WRITE A QUERY TO FIND TOTAL MONTHLY SPEND BY CARD TYPE AND EXPENSE TYPE
+
+select card_type, exp_type, year(date) as year, month(date) as month, sum(amount) as total_sum
+from credit_tran
+group by card_type, exp_type, year(date), month(date)
+order by year(date), month(date) asc;

@@ -14,11 +14,20 @@ Showcase efficient query design and data-driven storytelling using SQL alone.
 
 # Key SQL Insights
 Top 5 Cities by Spend – Total and percentage contribution of each city.
+
 Highest Spend Month by Card Type – Identified peak spending months using window functions.
+
 Cumulative Spend Milestone – Transactions when each card type reached ₹1,000,000 spend.
+
 Lowest Gold Card Contribution City – Found least contributing city using conditional aggregation.
+
 Outlier Detection – Detected unusually high spends using standard deviation.
+
 City Contribution Optimization – Reduced query time using OVER() instead of multiple scans.
+
 Progressive Subtotals – Used ROLLUP for city, year, and month totals.
+
 Median Spend per City – Calculated median using ranking logic.
+
 Gender-Based Spend Share – Percentage of female spending per expense type.
+

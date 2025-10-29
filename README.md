@@ -36,10 +36,17 @@ Gender-Based Spend Share – Percentage of female spending per expense type.
 
 CREATE TABLE credit_tran (
     id INT AUTO_INCREMENT PRIMARY KEY, -- Added for a unique transaction identifier
+    
     transactic_city VARCHAR(100) NOT NULL,
+    
     transactic_card_type VARCHAR(50) NOT NULL,
+    
     exp_type VARCHAR(50),
+    
     gender CHAR(1), -- Assuming gender is 'M' or 'F'
+    
     amount DECIMAL(10, 2) NOT NULL, -- Standard for currency, 10 digits total, 2 after the decimal
+    
     Date DATE -- Added a Date column, as your prior queries relied on it
+    
 );

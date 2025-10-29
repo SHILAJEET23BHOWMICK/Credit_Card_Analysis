@@ -35,6 +35,7 @@ Gender-Based Spend Share – Percentage of female spending per expense type.
 # SCHEMA:
 
 CREATE TABLE credit_tran (
+
     id INT AUTO_INCREMENT PRIMARY KEY, -- Added for a unique transaction identifier
     
     transactic_city VARCHAR(100) NOT NULL,
